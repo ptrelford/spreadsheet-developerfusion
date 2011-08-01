@@ -104,7 +104,7 @@ module Spreadsheet =
         | Term(f,[]) -> f 
         | _ -> failwith "Failed to parse formula"
 
-    let evaluate valueAt formula =
+    let evaluate (valueAt:int * int -> string) formula =
         let rec eval = function
             | Neg f -> - (eval f)
             | ArithmeticOp(f1,op,f2) -> arithmetic op (eval f1) (eval f2)

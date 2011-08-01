@@ -103,7 +103,7 @@ let parse s =
     | Term(f,[]) -> f 
     | _ -> failwith "Failed to parse formula"
 
-let evaluate valueAt formula =
+let evaluate (valueAt:int * int -> string) formula =
     let rec eval = function
         | Neg f -> - (eval f)
         | ArithmeticOp(f1,op,f2) -> arithmetic op (eval f1) (eval f2)
@@ -203,8 +203,9 @@ and Row (index,colCount,sheet) =
     member row.Cells = cells
     member row.Index = index
 and Sheet (colCount,rowCount) as sheet =
+    let cols = Array.init colCount (fun i -> string (int 'A' + i |> char)) 
     let rows = Array.init rowCount (fun index -> Row(index+1,colCount,sheet))
-    member sheet.ColCount = colCount
+    member sheet.Columns = cols
     member sheet.Rows = rows
     member sheet.MaxGeneration = 1000
 and ObservableObject() =
@@ -267,7 +268,7 @@ let fixWPF (grid:DataGrid) =
 let createGrid (sheet:Sheet) =
     let grid = DataGrid(AutoGenerateColumns=false,HeadersVisibility=DataGridHeadersVisibility.All)
     fixWPF grid
-    for i = 0 to sheet.ColCount-1 do createGridColumn i |> grid.Columns.Add
+    for i = 0 to sheet.Columns.Length-1 do createGridColumn i |> grid.Columns.Add
     grid.LoadingRow.Add (fun e ->
         let row = e.Row.DataContext :?> Row
         e.Row.Header <- row.Index
